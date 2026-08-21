@@ -250,6 +250,99 @@
   .rel-chip .sw{width:6px;height:6px;border-radius:50%;background:var(--rc-color,var(--amber));flex:none;}
   .rel-empty{font-family:var(--mono);font-size:12px;color:var(--text-faint);font-style:italic;}
 
+  /* ---------- ADMIN ---------- */
+  .admin-trigger{
+    position:fixed;right:20px;bottom:20px;z-index:60;
+    width:44px;height:44px;border-radius:50%;
+    background:var(--panel);border:1px solid var(--border);
+    color:var(--text-faint);font-size:18px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:border-color .15s ease,color .15s ease,transform .15s ease;
+  }
+  .admin-trigger:hover{border-color:var(--amber);color:var(--amber);transform:translateY(-2px);}
+
+  .auth-overlay,.admin-overlay{
+    position:fixed;inset:0;background:rgba(6,7,10,.78);backdrop-filter:blur(3px);
+    z-index:150;display:flex;align-items:center;justify-content:center;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;padding:20px;
+  }
+  .auth-overlay.open,.admin-overlay.open{opacity:1;pointer-events:auto;}
+
+  .auth-box{
+    width:min(360px,100%);background:var(--bg-2);border:1px solid var(--border);
+    padding:26px;border-radius:var(--radius);
+  }
+  .auth-box h3{font-family:var(--mono);font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--amber);margin:0 0 16px;}
+  .auth-box input{
+    width:100%;background:var(--panel);border:1px solid var(--border);color:var(--text);
+    padding:11px 12px;font-family:var(--mono);font-size:14px;border-radius:var(--radius);outline:none;margin-bottom:12px;
+  }
+  .auth-box input:focus{border-color:var(--amber);}
+  .auth-box .row{display:flex;gap:8px;}
+  .auth-box .err{color:#ea87ab;font-family:var(--mono);font-size:12px;margin-bottom:10px;min-height:14px;}
+  .auth-box .note{color:var(--text-faint);font-family:var(--mono);font-size:11px;margin-top:14px;line-height:1.6;}
+
+  .btn{
+    font-family:var(--mono);font-size:12px;letter-spacing:.05em;padding:10px 16px;
+    border:1px solid var(--border);background:none;color:var(--text-dim);cursor:pointer;border-radius:var(--radius);
+  }
+  .btn:hover{border-color:var(--text-faint);color:var(--text);}
+  .btn.primary{border-color:var(--amber);color:var(--amber);}
+  .btn.primary:hover{background:var(--amber);color:var(--bg-2);}
+  .btn.danger{border-color:#ea87ab;color:#ea87ab;}
+  .btn.danger:hover{background:#ea87ab;color:var(--bg-2);}
+  .btn:disabled{opacity:.4;cursor:default;}
+
+  .admin-box{
+    width:min(760px,100%);max-height:88vh;background:var(--bg-2);border:1px solid var(--border);
+    border-radius:var(--radius);display:flex;flex-direction:column;overflow:hidden;
+  }
+  .admin-head{
+    padding:16px 20px;border-bottom:1px solid var(--border-soft);
+    display:flex;align-items:center;justify-content:space-between;flex:none;
+  }
+  .admin-head h3{font-family:var(--mono);font-size:13px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin:0;}
+  .admin-head .actions{display:flex;gap:8px;}
+  .admin-note{
+    padding:10px 20px;font-family:var(--mono);font-size:11px;color:var(--text-faint);
+    background:var(--panel);border-bottom:1px solid var(--border-soft);line-height:1.6;flex:none;
+  }
+  .admin-tabs{display:flex;gap:6px;flex-wrap:wrap;padding:14px 20px 0;flex:none;}
+  .admin-body{padding:16px 20px 20px;overflow-y:auto;flex:1;}
+
+  .admin-add-btn{margin:14px 0 16px;}
+
+  .admin-item{
+    display:flex;align-items:center;justify-content:space-between;gap:12px;
+    padding:12px 14px;border:1px solid var(--border-soft);background:var(--panel);
+    margin-bottom:8px;border-radius:var(--radius);
+  }
+  .admin-item .info{min-width:0;}
+  .admin-item .info .t{font-size:14px;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .admin-item .info .m{font-family:var(--mono);font-size:11px;color:var(--text-faint);margin-top:2px;}
+  .admin-item .btns{display:flex;gap:6px;flex:none;}
+  .admin-item .btns button{
+    background:none;border:1px solid var(--border);color:var(--text-faint);
+    width:30px;height:30px;border-radius:var(--radius);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  }
+  .admin-item .btns button:hover{border-color:var(--amber);color:var(--amber);}
+  .admin-item .btns button.del:hover{border-color:#ea87ab;color:#ea87ab;}
+  .admin-item .btns button svg{width:14px;height:14px;}
+
+  .admin-empty{font-family:var(--mono);font-size:12px;color:var(--text-faint);padding:24px 0;text-align:center;}
+
+  .admin-form{border:1px solid var(--border);background:var(--panel);padding:16px;margin-bottom:16px;border-radius:var(--radius);}
+  .admin-form .f{margin-bottom:12px;}
+  .admin-form label{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--text-faint);margin-bottom:5px;}
+  .admin-form input,.admin-form textarea{
+    width:100%;background:var(--bg-2);border:1px solid var(--border);color:var(--text);
+    padding:9px 11px;font-family:var(--sans);font-size:13.5px;border-radius:var(--radius);outline:none;resize:vertical;
+  }
+  .admin-form input:focus,.admin-form textarea:focus{border-color:var(--amber);}
+  .admin-form textarea{min-height:70px;}
+  .admin-form .form-actions{display:flex;gap:8px;margin-top:6px;}
+  .admin-form .form-err{color:#ea87ab;font-family:var(--mono);font-size:11.5px;margin-bottom:10px;}
+
   /* ---------- FOOTER ---------- */
   footer{
     max-width:1180px;margin:40px auto 0;padding:22px 24px 40px;
@@ -265,6 +358,7 @@
     main{padding:8px 16px 80px;}
     .field-grid{grid-template-columns:1fr;}
     .modal{width:100vw;}
+    .admin-box{max-height:94vh;}
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -330,11 +424,81 @@
   </div>
 </div>
 
+<button class="admin-trigger" id="adminTrigger" title="Адмін-панель" aria-label="Адмін-панель">⚙</button>
+
+<div class="auth-overlay" id="authOverlay">
+  <div class="auth-box">
+    <h3>Вхід до адмін-панелі</h3>
+    <div class="err" id="authErr"></div>
+    <input type="password" id="authPassword" placeholder="Пароль" autocomplete="off">
+    <div class="row">
+      <button class="btn primary" id="authSubmit" style="flex:1;">Увійти</button>
+      <button class="btn" id="authCancel">Скасувати</button>
+    </div>
+    <div class="note" id="authNote"></div>
+  </div>
+</div>
+
+<div class="admin-overlay" id="adminOverlay">
+  <div class="admin-box">
+    <div class="admin-head">
+      <h3>Адмін-панель</h3>
+      <div class="actions">
+        <button class="btn" id="adminLogout">Вийти</button>
+        <button class="btn" id="adminClose">Закрити</button>
+      </div>
+    </div>
+    <div class="admin-note">Зміни зберігаються у Firebase і після збереження видимі всім відвідувачам сайту (після оновлення сторінки в них).</div>
+    <div class="admin-tabs" id="adminTabs"></div>
+    <div class="admin-body">
+      <button class="btn primary admin-add-btn" id="adminAddBtn">+ Додати запис</button>
+      <div id="adminFormWrap"></div>
+      <div id="adminList"></div>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
 <script>
 (function(){
   "use strict";
 
   const API_BASE = "https://swapi.info/api";
+
+  // ============================================================
+  // Firebase (опційно) — потрібен лише для того, щоб зміни в
+  // адмін-панелі бачили ВСІ відвідувачі сайту. Якщо не заповнити
+  // FIREBASE_CONFIG нижче — сайт і пошук працюють як завжди,
+  // просто без адмін-панелі (кнопка ⚙ покаже пояснення).
+  // Покрокова інструкція з налаштування — у README.md.
+  // ============================================================
+  const FIREBASE_CONFIG = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_PROJECT.firebaseapp.com",
+    projectId: "YOUR_PROJECT",
+    storageBucket: "YOUR_PROJECT.appspot.com",
+    messagingSenderId: "YOUR_SENDER_ID",
+    appId: "YOUR_APP_ID",
+  };
+  const ADMIN_EMAIL = "admin@sw-archive.local"; // службовий логін для Firebase Auth; сам пароль задається в консолі Firebase, не тут
+  const FIRESTORE_COLLECTION = "sw_custom_content";
+
+  let firebaseReady = false;
+  let db = null, auth = null;
+  try{
+    if(typeof firebase !== "undefined" && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey !== "YOUR_API_KEY"){
+      firebase.initializeApp(FIREBASE_CONFIG);
+      db = firebase.firestore();
+      auth = firebase.auth();
+      firebaseReady = true;
+    }
+  }catch(e){
+    console.warn("Firebase init failed:", e.message);
+    firebaseReady = false;
+  }
 
   const CATEGORIES = {
     people:    { label:"Персонажі", singular:"Персонаж", endpoint:"people",    color:"var(--c-people)",    titleField:"name",  searchFields:["name","gender","hair_color","eye_color","birth_year"] },
@@ -526,6 +690,19 @@
 
   const LOCAL_DATA = { legions: LEGIONS_DATA, commandos: COMMANDOS_DATA, mandalorians: MANDALORIANS_DATA };
 
+  // Схема полів для форми адмін-панелі: [ключ_поля, підпис, isTextarea?]
+  const ADMIN_SCHEMA = {
+    people: [["height","Зріст (см)"],["mass","Маса (кг)"],["gender","Стать"],["hair_color","Колір волосся"],["skin_color","Колір шкіри"],["eye_color","Колір очей"],["birth_year","Рік народження"]],
+    planets: [["climate","Клімат"],["terrain","Рельєф"],["population","Населення"],["diameter","Діаметр (км)"],["gravity","Гравітація"],["surface_water","Поверхн. вода (%)"],["rotation_period","Період обертання (год)"],["orbital_period","Орбітальний період (дні)"]],
+    starships: [["model","Модель"],["starship_class","Клас"],["manufacturer","Виробник"],["cost_in_credits","Вартість (кредити)"],["length","Довжина (м)"],["crew","Екіпаж"],["passengers","Пасажири"],["max_atmosphering_speed","Макс. швидкість"],["hyperdrive_rating","Рейтинг гіпердвигуна"],["MGLT","MGLT"],["cargo_capacity","Вантажопідйомність (кг)"],["consumables","Запаси"]],
+    vehicles: [["model","Модель"],["vehicle_class","Клас"],["manufacturer","Виробник"],["cost_in_credits","Вартість (кредити)"],["length","Довжина (м)"],["crew","Екіпаж"],["passengers","Пасажири"],["max_atmosphering_speed","Макс. швидкість"],["cargo_capacity","Вантажопідйомність (кг)"],["consumables","Запаси"]],
+    species: [["classification","Класифікація"],["designation","Позначення"],["average_height","Сер. зріст (см)"],["average_lifespan","Сер. тривалість життя"],["skin_colors","Кольори шкіри"],["hair_colors","Кольори волосся"],["eye_colors","Кольори очей"],["language","Мова"]],
+    films: [["episode_id","Епізод"],["director","Режисер"],["producer","Продюсер(и)"],["release_date","Дата релізу"],["opening_crawl","Вступний текст",true]],
+    legions: [["number","Номер"],["corps","Тип підрозділу"],["jedi_generals","Джедай-генерал(и)"],["clone_commander","Клон-командир"],["armor_color","Колір розпізн. знаків"],["nickname","Прізвисько"],["notable_battles","Відомі битви"],["notes","Опис/лор",true]],
+    commandos: [["squad_type","Тип підрозділу"],["members","Склад загону"],["homeworld","Місце вишколу"],["trainer","Інструктор"],["specialization","Спеціалізація"],["notable_missions","Відомі місії"],["notes","Опис/лор",true]],
+    mandalorians: [["type","Тип"],["leader","Лідер(и)"],["base","База/дім"],["colors","Колір/символіка"],["era","Період активності"],["notes","Опис/лор",true]],
+  };
+
   const UA = {
     unknown:"невідомо", "n/a":"н/д", none:"немає",
     male:"чоловіча", female:"жіноча", hermaphrodite:"гермафродит",
@@ -545,9 +722,11 @@
     return s;
   }
 
-  const DB = {};        // category -> array of records
+  const DB = {};        // category -> array of records (після злиття з адмін-правками)
+  const ORIGINAL_DB = {}; // category -> "чисті" дані з API/локальних наборів, без адмін-правок
   const INDEX = new Map(); // url -> {record, category}
   let TOTAL = 0;
+  let customStore = { added:{}, edited:{}, deletedUrls:[] }; // адмін-правки з Firestore
 
   const bootLines = document.getElementById("bootLines");
   const bootProgress = document.getElementById("bootProgress");
@@ -587,6 +766,69 @@
     return data.length;
   }
 
+  function sanitizeDocId(url){
+    return String(url).replace(/[^a-zA-Z0-9]/g,"_").slice(0,140);
+  }
+
+  async function loadCustomStore(){
+    customStore = { added:{}, edited:{}, deletedUrls:[] };
+    if(!firebaseReady || !db) return;
+    try{
+      const snap = await db.collection(FIRESTORE_COLLECTION).get();
+      snap.forEach(doc=>{
+        const d = doc.data();
+        if(!d || !d.type || !d.category) return;
+        if(d.type==="add"){
+          if(!customStore.added[d.category]) customStore.added[d.category] = [];
+          customStore.added[d.category].push(Object.assign({}, d.data, {url:d.url}));
+        } else if(d.type==="edit"){
+          customStore.edited[d.url] = d.data;
+        } else if(d.type==="delete"){
+          customStore.deletedUrls.push(d.url);
+        }
+      });
+    }catch(e){
+      console.warn("Firestore custom content unavailable:", e.message);
+    }
+  }
+
+  function applyCustomStore(){
+    INDEX.clear();
+    Object.keys(CATEGORIES).forEach(key=>{
+      const base = (ORIGINAL_DB[key]||[]).slice();
+      const added = (customStore.added[key]||[]).slice();
+      let merged = base.concat(added);
+      merged = merged.filter(r=>!customStore.deletedUrls.includes(r.url));
+      merged = merged.map(r=> customStore.edited[r.url] ? Object.assign({}, r, customStore.edited[r.url]) : r);
+      DB[key] = merged;
+      merged.forEach(rec=>INDEX.set(rec.url, {record:rec, category:key}));
+    });
+    TOTAL = Object.keys(CATEGORIES).reduce((s,k)=> s+(DB[k]||[]).length, 0);
+  }
+
+  async function adminSaveAdd(category, formData){
+    const newUrl = `local://custom/${category}/${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+    const docId = "add_"+sanitizeDocId(newUrl);
+    await db.collection(FIRESTORE_COLLECTION).doc(docId).set({type:"add", category, url:newUrl, data:formData, updatedAt:Date.now()});
+    if(!customStore.added[category]) customStore.added[category] = [];
+    customStore.added[category].push(Object.assign({}, formData, {url:newUrl}));
+    applyCustomStore();
+  }
+
+  async function adminSaveEdit(category, url, formData){
+    const docId = "edit_"+sanitizeDocId(url);
+    await db.collection(FIRESTORE_COLLECTION).doc(docId).set({type:"edit", category, url, data:formData, updatedAt:Date.now()});
+    customStore.edited[url] = formData;
+    applyCustomStore();
+  }
+
+  async function adminDeleteRecord(category, url){
+    const docId = "delete_"+sanitizeDocId(url);
+    await db.collection(FIRESTORE_COLLECTION).doc(docId).set({type:"delete", category, url, updatedAt:Date.now()});
+    if(!customStore.deletedUrls.includes(url)) customStore.deletedUrls.push(url);
+    applyCustomStore();
+  }
+
   async function boot_sequence(){
     const keys = Object.keys(CATEGORIES);
     let done = 0;
@@ -615,6 +857,17 @@
       showConnectionError();
       return;
     }
+
+    Object.keys(DB).forEach(k=>{ ORIGINAL_DB[k] = DB[k]; });
+    if(firebaseReady){
+      logBoot("Синхронізація адмін-даних (Firebase)...");
+      await loadCustomStore();
+      bootLines.lastElementChild.remove();
+      logBoot("Адмін-дані: синхронізовано", true);
+    } else {
+      await loadCustomStore(); // без Firebase просто скидає customStore, нічого не ламає
+    }
+    applyCustomStore();
 
     logBoot(`Індексацію завершено. Всього записів: ${TOTAL}.${failed? ` (${failed} категорій недоступні)`:""}`, true);
     await sleep(350);
@@ -1021,6 +1274,206 @@
       backBtn.disabled = navStack.length<=1;
     }
   });
+
+  // ================= АДМІН-ПАНЕЛЬ =================
+  const adminTrigger = document.getElementById("adminTrigger");
+  const authOverlay = document.getElementById("authOverlay");
+  const authPassword = document.getElementById("authPassword");
+  const authSubmit = document.getElementById("authSubmit");
+  const authCancel = document.getElementById("authCancel");
+  const authErr = document.getElementById("authErr");
+  const authNote = document.getElementById("authNote");
+  const adminOverlay = document.getElementById("adminOverlay");
+  const adminCloseBtn = document.getElementById("adminClose");
+  const adminLogoutBtn = document.getElementById("adminLogout");
+  const adminTabs = document.getElementById("adminTabs");
+  const adminList = document.getElementById("adminList");
+  const adminAddBtn = document.getElementById("adminAddBtn");
+  const adminFormWrap = document.getElementById("adminFormWrap");
+
+  let adminCategory = "legions";
+  let isAdmin = false;
+
+  function escapeAttr(v){
+    return escapeHtml(v).replace(/"/g,"&quot;");
+  }
+
+  function openAuth(){
+    authErr.textContent = "";
+    if(!firebaseReady){
+      authNote.textContent = "Firebase не налаштовано на цьому сайті — адмін-панель поки недоступна. Дивіться README.md для інструкції з налаштування.";
+      authPassword.style.display = "none";
+      authSubmit.style.display = "none";
+    } else {
+      authNote.textContent = "";
+      authPassword.style.display = "";
+      authSubmit.style.display = "";
+      authPassword.value = "";
+    }
+    authOverlay.classList.add("open");
+    if(firebaseReady) setTimeout(()=>authPassword.focus(), 50);
+  }
+  function closeAuth(){ authOverlay.classList.remove("open"); }
+
+  adminTrigger.addEventListener("click", ()=>{
+    if(isAdmin){ openAdminPanel(); } else { openAuth(); }
+  });
+  authCancel.addEventListener("click", closeAuth);
+  authOverlay.addEventListener("click", e=>{ if(e.target===authOverlay) closeAuth(); });
+
+  async function doLogin(){
+    if(!firebaseReady) return;
+    const pass = authPassword.value;
+    if(!pass){ authErr.textContent = "Введіть пароль"; return; }
+    authSubmit.disabled = true;
+    authErr.textContent = "";
+    try{
+      await auth.signInWithEmailAndPassword(ADMIN_EMAIL, pass);
+      isAdmin = true;
+      closeAuth();
+      openAdminPanel();
+    }catch(e){
+      authErr.textContent = "Невірний пароль";
+    }
+    authSubmit.disabled = false;
+  }
+  authSubmit.addEventListener("click", doLogin);
+  authPassword.addEventListener("keydown", e=>{ if(e.key==="Enter") doLogin(); });
+
+  if(firebaseReady){
+    auth.onAuthStateChanged(user=>{ isAdmin = !!user; });
+  }
+
+  function openAdminPanel(){
+    adminOverlay.classList.add("open");
+    renderAdminTabs();
+    closeAdminForm();
+    renderAdminList();
+  }
+  function closeAdminPanel(){ adminOverlay.classList.remove("open"); }
+  adminCloseBtn.addEventListener("click", closeAdminPanel);
+  adminOverlay.addEventListener("click", e=>{ if(e.target===adminOverlay) closeAdminPanel(); });
+  adminLogoutBtn.addEventListener("click", async ()=>{
+    if(firebaseReady && auth) await auth.signOut();
+    isAdmin = false;
+    closeAdminPanel();
+  });
+
+  function renderAdminTabs(){
+    adminTabs.innerHTML = "";
+    Object.keys(CATEGORIES).forEach(key=>{
+      const cfg = CATEGORIES[key];
+      const el = document.createElement("div");
+      el.className = "chip" + (adminCategory===key ? " active":"");
+      el.style.cursor = "pointer";
+      if(adminCategory===key){ el.style.background = cfg.color; el.style.borderColor = "transparent"; }
+      el.textContent = cfg.label;
+      el.addEventListener("click", ()=>{ adminCategory=key; renderAdminTabs(); closeAdminForm(); renderAdminList(); });
+      adminTabs.appendChild(el);
+    });
+  }
+
+  function renderAdminList(){
+    const cfg = CATEGORIES[adminCategory];
+    const items = DB[adminCategory] || [];
+    if(items.length===0){
+      adminList.innerHTML = `<div class="admin-empty">Записів немає</div>`;
+      return;
+    }
+    adminList.innerHTML = "";
+    items.forEach(rec=>{
+      const meta = shortMeta(adminCategory, rec).map(([k,v])=>`${k}: ${v}`).join(" · ");
+      const row = document.createElement("div");
+      row.className = "admin-item";
+      row.innerHTML = `
+        <div class="info">
+          <div class="t">${escapeHtml(rec[cfg.titleField])}</div>
+          <div class="m">${escapeHtml(meta)}</div>
+        </div>
+        <div class="btns">
+          <button class="edit" title="Редагувати"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+          <button class="del" title="Видалити"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M19 6l-1 14H6L5 6"/></svg></button>
+        </div>
+      `;
+      row.querySelector(".edit").addEventListener("click", ()=> openAdminForm(rec));
+      row.querySelector(".del").addEventListener("click", ()=> handleAdminDelete(rec));
+      adminList.appendChild(row);
+    });
+  }
+
+  function closeAdminForm(){ adminFormWrap.innerHTML = ""; }
+
+  function openAdminForm(existingRec){
+    const cfg = CATEGORIES[adminCategory];
+    const schema = ADMIN_SCHEMA[adminCategory] || [];
+    const titleLabel = adminCategory==="films" ? "Назва фільму" : "Ім'я / назва";
+
+    let html = `<div class="admin-form"><div class="form-err" id="adminFormErr"></div>`;
+    html += `<div class="f"><label>${titleLabel}</label><input id="af_title" value="${existingRec?escapeAttr(existingRec[cfg.titleField]):""}"></div>`;
+    schema.forEach(([key,label,isTextarea])=>{
+      const val = existingRec ? existingRec[key] : "";
+      if(isTextarea){
+        html += `<div class="f"><label>${label}</label><textarea id="af_${key}">${escapeHtml(val)}</textarea></div>`;
+      } else {
+        html += `<div class="f"><label>${label}</label><input id="af_${key}" value="${escapeAttr(val)}"></div>`;
+      }
+    });
+    html += `<div class="form-actions">
+      <button class="btn primary" id="adminFormSave">${existingRec?"Зберегти":"Додати"}</button>
+      <button class="btn" id="adminFormCancel">Скасувати</button>
+    </div></div>`;
+    adminFormWrap.innerHTML = html;
+
+    document.getElementById("adminFormCancel").addEventListener("click", closeAdminForm);
+    document.getElementById("adminFormSave").addEventListener("click", ()=> handleAdminSave(existingRec));
+  }
+
+  adminAddBtn.addEventListener("click", ()=> openAdminForm(null));
+
+  async function handleAdminSave(existingRec){
+    const cfg = CATEGORIES[adminCategory];
+    const schema = ADMIN_SCHEMA[adminCategory] || [];
+    const errEl = document.getElementById("adminFormErr");
+    const titleVal = document.getElementById("af_title").value.trim();
+    if(!titleVal){ errEl.textContent = "Назва обов'язкова"; return; }
+    const data = {};
+    data[cfg.titleField] = titleVal;
+    schema.forEach(([key])=>{
+      const el = document.getElementById("af_"+key);
+      if(el) data[key] = el.value;
+    });
+
+    const saveBtn = document.getElementById("adminFormSave");
+    saveBtn.disabled = true;
+    errEl.textContent = "";
+    try{
+      if(!firebaseReady || !isAdmin) throw new Error("немає доступу для запису (спробуйте увійти повторно)");
+      if(existingRec){
+        await adminSaveEdit(adminCategory, existingRec.url, data);
+      } else {
+        await adminSaveAdd(adminCategory, data);
+      }
+      closeAdminForm();
+      renderAdminList();
+      renderStats(); renderChips(); runSearch();
+    }catch(e){
+      errEl.textContent = "Помилка збереження: " + e.message;
+    }
+    saveBtn.disabled = false;
+  }
+
+  async function handleAdminDelete(rec){
+    const cfg = CATEGORIES[adminCategory];
+    if(!confirm(`Видалити запис «${rec[cfg.titleField]}»? Цю дію не можна скасувати.`)) return;
+    try{
+      if(!firebaseReady || !isAdmin) throw new Error("немає доступу для запису (спробуйте увійти повторно)");
+      await adminDeleteRecord(adminCategory, rec.url);
+      renderAdminList();
+      renderStats(); renderChips(); runSearch();
+    }catch(e){
+      alert("Помилка видалення: " + e.message);
+    }
+  }
 
   boot_sequence();
 })();
