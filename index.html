@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>АРХІВ // База даних всесвіту Star Wars</title>
+<meta name="description" content="Автономна база даних для пошуку інформації по всесвіту Star Wars: персонажі, планети, кораблі, техніка, види та фільми.">
+<link rel="icon" href="data:,">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0a0c10;
+    --bg-2:#06070a;
+    --panel:#12151c;
+    --panel-2:#171b24;
+    --border:#242938;
+    --border-soft:#1a1e29;
+    --text:#e6e9ef;
+    --text-dim:#8b93a1;
+    --text-faint:#565f70;
+    --amber:#e3a33d;
+    --amber-dim:#8a6a34;
+    --cyan:#5fd0dd;
+
+    --c-people:#5fd0dd;
+    --c-planets:#e3a33d;
+    --c-starships:#a68af0;
+    --c-vehicles:#6fcf8f;
+    --c-species:#ea87ab;
+    --c-films:#f0c674;
+
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    --sans:'Inter', -apple-system, sans-serif;
+    --radius:2px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(ellipse 1200px 600px at 50% -10%, rgba(227,163,61,0.06), transparent 60%),
+      radial-gradient(ellipse 900px 500px at 90% 100%, rgba(95,208,221,0.05), transparent 60%),
+      var(--bg-2);
+    color:var(--text);
+    font-family:var(--sans);
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  ::selection{background:var(--amber);color:#0a0c10;}
+
+  /* subtle scanline + grain overlay across whole page */
+  .grain{
+    pointer-events:none;position:fixed;inset:0;z-index:50;opacity:0.035;
+    background-image:repeating-linear-gradient(0deg, #fff 0px, transparent 1px, transparent 2px);
+    mix-blend-mode:overlay;
+  }
+
+  a{color:inherit;}
+
+  /* ---------- BOOT OVERLAY ---------- */
+  #boot{
+    position:fixed;inset:0;background:var(--bg-2);z-index:200;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    font-family:var(--mono);color:var(--amber);
+    transition:opacity .5s ease, visibility .5s ease;
+  }
+  #boot.hidden{opacity:0;visibility:hidden;pointer-events:none;}
+  #boot .boot-lines{width:min(520px,86vw);font-size:13px;line-height:1.9;color:var(--text-dim);min-height:150px;}
+  #boot .boot-lines .ok{color:var(--c-vehicles);}
+  #boot .boot-title{font-size:11px;letter-spacing:.3em;color:var(--text-faint);margin-bottom:18px;}
+  #boot .cursor{display:inline-block;width:7px;height:14px;background:var(--amber);margin-left:4px;animation:blink 1s steps(1) infinite;vertical-align:-2px;}
+  @keyframes blink{50%{opacity:0;}}
+  #boot .progress-track{width:min(520px,86vw);height:2px;background:var(--border);margin-top:20px;overflow:hidden;}
+  #boot .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--amber),var(--cyan));transition:width .3s ease;}
+
+  /* ---------- HEADER ---------- */
+  header{
+    position:relative;
+    padding:56px 24px 28px;
+    max-width:1180px;margin:0 auto;
+  }
+  .eyebrow{
+    font-family:var(--mono);font-size:11px;letter-spacing:.35em;color:var(--text-faint);
+    display:flex;align-items:center;gap:10px;margin-bottom:14px;
+  }
+  .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--c-vehicles);box-shadow:0 0 8px var(--c-vehicles);}
+  .eyebrow .dot.pending{background:var(--amber);box-shadow:0 0 8px var(--amber);animation:pulse 1.5s ease-in-out infinite;}
+  @keyframes pulse{50%{opacity:.4;}}
+
+  h1{
+    font-family:var(--mono);font-weight:800;font-size:clamp(28px,5vw,46px);
+    margin:0 0 8px;letter-spacing:-0.01em;
+    background:linear-gradient(180deg,#fdf6e8,#c8ccd6 140%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  h1 .slash{color:var(--amber);-webkit-text-fill-color:var(--amber);}
+  .subhead{color:var(--text-dim);font-size:15px;max-width:560px;line-height:1.6;margin:0 0 30px;}
+
+  .stats-row{display:flex;gap:28px;flex-wrap:wrap;font-family:var(--mono);font-size:12px;color:var(--text-faint);margin-bottom:8px;}
+  .stats-row b{color:var(--text);font-size:15px;display:block;font-weight:700;}
+  .stats-row span{display:block;margin-top:2px;letter-spacing:.05em;}
+
+  /* ---------- SEARCH ---------- */
+  .search-wrap{
+    max-width:1180px;margin:0 auto;padding:0 24px;position:sticky;top:0;z-index:40;
+    padding-top:14px;padding-bottom:14px;
+    background:linear-gradient(var(--bg-2) 78%, transparent);
+  }
+  .search-box{
+    position:relative;
+    border:1px solid var(--border);
+    background:var(--panel);
+    display:flex;align-items:center;gap:12px;
+    padding:14px 16px;
+    border-radius:var(--radius);
+  }
+  .search-box:focus-within{border-color:var(--amber);box-shadow:0 0 0 1px var(--amber), 0 0 24px rgba(227,163,61,.12);}
+  .search-box svg{flex:none;width:18px;height:18px;color:var(--text-faint);}
+  .search-box input{
+    flex:1;background:none;border:none;outline:none;color:var(--text);
+    font-family:var(--mono);font-size:15px;letter-spacing:.01em;
+  }
+  .search-box input::placeholder{color:var(--text-faint);}
+  .search-box .kbd{
+    font-family:var(--mono);font-size:11px;color:var(--text-faint);
+    border:1px solid var(--border);padding:2px 6px;border-radius:3px;flex:none;
+  }
+
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  .chip{
+    font-family:var(--mono);font-size:12px;letter-spacing:.04em;
+    padding:8px 13px;border:1px solid var(--border);background:var(--panel);
+    color:var(--text-dim);cursor:pointer;border-radius:var(--radius);
+    display:flex;align-items:center;gap:7px;user-select:none;
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .chip .n{color:var(--text-faint);font-size:11px;}
+  .chip:hover{border-color:var(--text-faint);color:var(--text);}
+  .chip.active{color:var(--bg-2);border-color:transparent;}
+  .chip .swatch{width:8px;height:8px;border-radius:50%;flex:none;}
+
+  /* ---------- RESULTS ---------- */
+  main{max-width:1180px;margin:0 auto;padding:8px 24px 100px;}
+  .result-meta{
+    font-family:var(--mono);font-size:12px;color:var(--text-faint);
+    margin:18px 2px 16px;letter-spacing:.05em;
+    display:flex;justify-content:space-between;align-items:baseline;
+  }
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;}
+
+  .card{
+    position:relative;background:var(--panel);border:1px solid var(--border-soft);
+    padding:18px 16px 16px;cursor:pointer;border-radius:var(--radius);
+    overflow:hidden;transition:border-color .18s ease, transform .18s ease, background .18s ease;
+  }
+  .card:hover, .card:focus-visible{border-color:var(--card-color, var(--amber));transform:translateY(-2px);background:var(--panel-2);outline:none;}
+  .card::before,.card::after{
+    content:"";position:absolute;width:10px;height:10px;border:1.5px solid var(--card-color,var(--amber));
+    opacity:0;transition:opacity .18s ease;
+  }
+  .card::before{top:6px;left:6px;border-right:none;border-bottom:none;}
+  .card::after{bottom:6px;right:6px;border-left:none;border-top:none;}
+  .card:hover::before,.card:hover::after,.card:focus-visible::before,.card:focus-visible::after{opacity:1;}
+
+  .card .cat-tag{
+    font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--card-color,var(--amber));margin-bottom:10px;display:flex;align-items:center;gap:6px;
+  }
+  .card .cat-tag::before{content:"";width:5px;height:5px;background:var(--card-color,var(--amber));border-radius:50%;}
+  .card h3{margin:0 0 10px;font-size:16px;font-weight:600;line-height:1.3;font-family:var(--sans);}
+  .card .meta-line{font-family:var(--mono);font-size:11.5px;color:var(--text-faint);display:flex;flex-direction:column;gap:3px;}
+  .card .meta-line b{color:var(--text-dim);font-weight:500;}
+
+  .empty{
+    text-align:center;padding:80px 20px;color:var(--text-faint);font-family:var(--mono);font-size:13px;
+    border:1px dashed var(--border);letter-spacing:.05em;
+  }
+  .empty .big{font-size:28px;color:var(--text-dim);display:block;margin-bottom:12px;}
+
+  /* ---------- LOAD MORE ---------- */
+  .load-more{
+    display:block;margin:28px auto 0;padding:12px 26px;background:none;
+    border:1px solid var(--border);color:var(--text-dim);font-family:var(--mono);font-size:12px;
+    letter-spacing:.08em;cursor:pointer;border-radius:var(--radius);
+  }
+  .load-more:hover{border-color:var(--amber);color:var(--amber);}
+
+  /* ---------- MODAL ---------- */
+  .modal-overlay{
+    position:fixed;inset:0;background:rgba(6,7,10,.72);backdrop-filter:blur(3px);
+    z-index:100;display:flex;justify-content:flex-end;
+    opacity:0;pointer-events:none;transition:opacity .25s ease;
+  }
+  .modal-overlay.open{opacity:1;pointer-events:auto;}
+  .modal{
+    width:min(560px,100vw);height:100%;background:var(--bg-2);border-left:1px solid var(--border);
+    overflow-y:auto;transform:translateX(24px);transition:transform .28s ease;
+    padding:0 0 60px;
+  }
+  .modal-overlay.open .modal{transform:translateX(0);}
+
+  .modal-head{
+    position:sticky;top:0;background:var(--bg-2);border-bottom:1px solid var(--border-soft);
+    padding:18px 22px;display:flex;align-items:center;justify-content:space-between;z-index:2;
+  }
+  .modal-head .left{display:flex;gap:10px;align-items:center;}
+  .icon-btn{
+    background:none;border:1px solid var(--border);color:var(--text-dim);width:32px;height:32px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:var(--radius);flex:none;
+  }
+  .icon-btn:hover{border-color:var(--amber);color:var(--amber);}
+  .icon-btn svg{width:15px;height:15px;}
+  .icon-btn:disabled{opacity:.25;cursor:default;}
+  .icon-btn:disabled:hover{border-color:var(--border);color:var(--text-dim);}
+
+  .modal-body{padding:24px 22px 10px;}
+  .modal .cat-tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;display:inline-block;padding:4px 9px;border:1px solid currentColor;border-radius:2px;}
+  .modal h2{font-family:var(--sans);font-size:26px;font-weight:700;margin:2px 0 4px;line-height:1.2;}
+  .modal .subtitle{color:var(--text-faint);font-family:var(--mono);font-size:12px;margin-bottom:22px;}
+
+  .crawl{
+    font-family:var(--mono);font-size:12.5px;line-height:1.9;color:var(--text-dim);
+    white-space:pre-wrap;background:var(--panel);border:1px solid var(--border-soft);
+    padding:16px;margin-bottom:22px;border-left:2px solid var(--amber);
+  }
+
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border-soft);border:1px solid var(--border-soft);margin-bottom:22px;}
+  .field{background:var(--panel);padding:11px 14px;}
+  .field .k{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint);margin-bottom:4px;}
+  .field .v{font-size:14px;color:var(--text);font-weight:500;word-break:break-word;}
+  .field .v.mono{font-family:var(--mono);font-size:13px;}
+
+  .rel-section{margin-bottom:22px;}
+  .rel-section .rel-title{font-family:var(--mono);font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;display:flex;align-items:center;gap:8px;}
+  .rel-section .rel-title .count{color:var(--text-dim);}
+  .rel-chips{display:flex;flex-wrap:wrap;gap:7px;}
+  .rel-chip{
+    font-family:var(--sans);font-size:12.5px;padding:7px 12px;border:1px solid var(--border);
+    background:var(--panel);cursor:pointer;border-radius:var(--radius);color:var(--text);
+    display:flex;align-items:center;gap:7px;transition:border-color .15s ease,background .15s ease;
+  }
+  .rel-chip:hover{background:var(--panel-2);border-color:var(--rc-color,var(--amber));}
+  .rel-chip .sw{width:6px;height:6px;border-radius:50%;background:var(--rc-color,var(--amber));flex:none;}
+  .rel-empty{font-family:var(--mono);font-size:12px;color:var(--text-faint);font-style:italic;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    max-width:1180px;margin:40px auto 0;padding:22px 24px 40px;
+    border-top:1px solid var(--border-soft);color:var(--text-faint);
+    font-family:var(--mono);font-size:11.5px;line-height:1.8;
+  }
+  footer a{color:var(--text-dim);text-decoration:underline;text-underline-offset:3px;}
+  footer a:hover{color:var(--amber);}
+
+  @media (max-width:640px){
+    header{padding:36px 16px 20px;}
+    .search-wrap{padding:12px 16px;}
+    main{padding:8px 16px 80px;}
+    .field-grid{grid-template-columns:1fr;}
+    .modal{width:100vw;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:.001s !important;transition-duration:.001s !important;}
+  }
+
+  .visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<div id="boot" role="status" aria-live="polite">
+  <div class="boot-title">GALACTIC RECORDS DIVISION</div>
+  <div class="boot-lines" id="bootLines"><span class="cursor"></span></div>
+  <div class="progress-track"><div class="progress-fill" id="bootProgress"></div></div>
+</div>
+
+<header>
+  <div class="eyebrow"><span class="dot pending" id="statusDot"></span><span id="statusText">СИНХРОНІЗАЦІЯ...</span></div>
+  <h1>АРХІВ<span class="slash"> // </span>ГАЛАКТИКА</h1>
+  <p class="subhead">Автономна база даних всесвіту Star Wars — персонажі, планети, кораблі, техніка, види та епізоди. Працює повністю у вашому браузері, без сервера.</p>
+  <div class="stats-row" id="statsRow"></div>
+</header>
+
+<div class="search-wrap">
+  <div class="search-box">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+    <input id="searchInput" type="text" placeholder="Пошук за іменем, назвою, кліматом, моделлю..." autocomplete="off" disabled>
+    <span class="kbd">/</span>
+  </div>
+  <div class="chips" id="chips"></div>
+</div>
+
+<main>
+  <div class="result-meta">
+    <span id="resultCount">Завантаження бази...</span>
+    <span id="resultSort"></span>
+  </div>
+  <div class="grid" id="grid"></div>
+  <button class="load-more" id="loadMore" style="display:none;">Показати ще</button>
+</main>
+
+<footer>
+  <div>ДЖЕРЕЛО ДАНИХ: <a href="https://swapi.info" target="_blank" rel="noopener">swapi.info</a> — вільний, безкоштовний Star Wars API. Дані про персонажів, планети, кораблі, техніку, види та фільми надаються без гарантій точності.</div>
+  <div style="margin-top:6px;">Star Wars та всі пов'язані назви є власністю Lucasfilm Ltd. Цей проєкт створено фанатами в освітніх цілях і не пов'язаний з Lucasfilm/Disney.</div>
+</footer>
+
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-head">
+      <div class="left">
+        <button class="icon-btn" id="backBtn" title="Назад" aria-label="Назад">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+        </button>
+      </div>
+      <button class="icon-btn" id="closeBtn" title="Закрити" aria-label="Закрити">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const API_BASE = "https://swapi.info/api";
+
+  const CATEGORIES = {
+    people:    { label:"Персонажі", singular:"Персонаж", endpoint:"people",    color:"var(--c-people)",    titleField:"name",  searchFields:["name","gender","hair_color","eye_color","birth_year"] },
+    planets:   { label:"Планети",   singular:"Планета",   endpoint:"planets",  color:"var(--c-planets)",   titleField:"name",  searchFields:["name","climate","terrain"] },
+    starships: { label:"Кораблі",   singular:"Корабель",  endpoint:"starships",color:"var(--c-starships)", titleField:"name",  searchFields:["name","model","manufacturer","starship_class"] },
+    vehicles:  { label:"Техніка",   singular:"Техніка",   endpoint:"vehicles", color:"var(--c-vehicles)",  titleField:"name",  searchFields:["name","model","manufacturer","vehicle_class"] },
+    species:   { label:"Види",      singular:"Вид",       endpoint:"species",  color:"var(--c-species)",   titleField:"name",  searchFields:["name","classification","language"] },
+    films:     { label:"Фільми",    singular:"Фільм",     endpoint:"films",    color:"var(--c-films)",     titleField:"title", searchFields:["title","director","producer","opening_crawl"] },
+  };
+
+  const UA = {
+    unknown:"невідомо", "n/a":"н/д", none:"немає",
+    male:"чоловіча", female:"жіноча", hermaphrodite:"гермафродит",
+  };
+  function tr(v){
+    if(v===undefined||v===null||v==="") return "невідомо";
+    const key = String(v).toLowerCase();
+    return UA[key] || v;
+  }
+  function fmtNum(v){
+    if(v===undefined||v===null) return "невідомо";
+    const s = String(v);
+    if(s.toLowerCase()==="unknown") return "невідомо";
+    if(s.toLowerCase()==="n/a") return "н/д";
+    const n = Number(s.replace(/,/g,""));
+    if(!isNaN(n) && s.replace(/,/g,"").match(/^\d+(\.\d+)?$/)) return n.toLocaleString("uk-UA");
+    return s;
+  }
+
+  const DB = {};        // category -> array of records
+  const INDEX = new Map(); // url -> {record, category}
+  let TOTAL = 0;
+
+  const bootLines = document.getElementById("bootLines");
+  const bootProgress = document.getElementById("bootProgress");
+  const boot = document.getElementById("boot");
+  const statusDot = document.getElementById("statusDot");
+  const statusText = document.getElementById("statusText");
+  const statsRow = document.getElementById("statsRow");
+  const searchInput = document.getElementById("searchInput");
+  const chipsEl = document.getElementById("chips");
+  const gridEl = document.getElementById("grid");
+  const resultCount = document.getElementById("resultCount");
+  const loadMoreBtn = document.getElementById("loadMore");
+
+  function logBoot(msg, ok){
+    const cur = bootLines.querySelector(".cursor");
+    const line = document.createElement("div");
+    line.innerHTML = (ok ? '<span class="ok">✓</span> ' : "· ") + msg;
+    bootLines.insertBefore(line, cur);
+  }
+
+  function idFromUrl(url){
+    const m = String(url).match(/\/(\d+)\/?$/);
+    return m ? m[1] : url;
+  }
+
+  async function fetchCategory(key, cfg){
+    const res = await fetch(`${API_BASE}/${cfg.endpoint}`);
+    if(!res.ok) throw new Error(`${cfg.endpoint}: HTTP ${res.status}`);
+    const data = await res.json();
+    DB[key] = data;
+    data.forEach(rec => INDEX.set(rec.url, {record:rec, category:key}));
+    return data.length;
+  }
+
+  async function boot_sequence(){
+    const keys = Object.keys(CATEGORIES);
+    let done = 0;
+    let failed = 0;
+    logBoot("Ініціалізація термінала архіву...", true);
+    for(const key of keys){
+      const cfg = CATEGORIES[key];
+      logBoot(`Запит ресурсу: ${cfg.endpoint}...`);
+      try{
+        const count = await fetchCategory(key, cfg);
+        TOTAL += count;
+        done++;
+        bootLines.lastElementChild.remove();
+        logBoot(`${cfg.label}: отримано ${count} записів`, true);
+      }catch(e){
+        failed++;
+        bootLines.lastElementChild.remove();
+        logBoot(`${cfg.label}: помилка з'єднання (${e.message})`, false);
+      }
+      bootProgress.style.width = Math.round(((done+failed)/keys.length)*100) + "%";
+    }
+
+    if(failed===keys.length){
+      // everything failed — almost certainly a CORS/file:// or offline issue
+      showConnectionError();
+      return;
+    }
+
+    logBoot(`Індексацію завершено. Всього записів: ${TOTAL}.${failed? ` (${failed} категорій недоступні)`:""}`, true);
+    await sleep(350);
+    finishBoot();
+  }
+
+  function showConnectionError(){
+    boot.innerHTML = `
+      <div class="boot-title">ПОМИЛКА З'ЄДНАННЯ</div>
+      <div class="boot-lines" style="color:#ea87ab;max-width:560px;">
+        Не вдалося завантажити дані з swapi.info.<br><br>
+        Найімовірніша причина: сторінку відкрито напряму з файлу
+        (адреса починається з <b style="color:#e3a33d;">file://</b>), і браузер блокує
+        такі запити через CORS.<br><br>
+        <span style="color:#8b93a1;">Що робити:</span><br>
+        1) Відкрийте сайт через локальний сервер:<br>
+        <span style="color:#e3a33d;">python3 -m http.server 8000</span> → потім
+        <span style="color:#e3a33d;">http://localhost:8000</span><br>
+        2) Або просто викладіть файл на GitHub Pages — там усе працює одразу,
+        бо адреса вже https://.<br>
+        3) Перевірте інтернет-з'єднання та чи не блокує запит розширення-блокер реклами.
+      </div>
+      <button id="retryBoot" style="margin-top:22px;padding:10px 22px;background:none;border:1px solid #e3a33d;color:#e3a33d;font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;cursor:pointer;">СПРОБУВАТИ ЩЕ РАЗ</button>
+    `;
+    document.getElementById("retryBoot").addEventListener("click", ()=>{
+      Object.keys(DB).forEach(k=>delete DB[k]);
+      INDEX.clear();
+      TOTAL = 0;
+      location.reload();
+    });
+  }
+
+  function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+  function finishBoot(){
+    boot.classList.add("hidden");
+    statusDot.classList.remove("pending");
+    statusText.textContent = "БАЗУ СИНХРОНІЗОВАНО";
+    searchInput.disabled = false;
+    searchInput.placeholder = "Пошук за іменем, назвою, кліматом, моделлю...";
+    renderStats();
+    renderChips();
+    runSearch();
+    searchInput.focus();
+  }
+
+  function renderStats(){
+    statsRow.innerHTML = "";
+    const items = [{label:"Всього записів", value:TOTAL}].concat(
+      Object.keys(CATEGORIES).map(k=>({label:CATEGORIES[k].label, value:(DB[k]||[]).length}))
+    );
+    items.forEach(it=>{
+      const d = document.createElement("div");
+      d.innerHTML = `<b>${it.value}</b><span>${it.label}</span>`;
+      statsRow.appendChild(d);
+    });
+  }
+
+  let activeCategory = "all";
+  let query = "";
+  let visibleCount = 24;
+  const PAGE_SIZE = 24;
+
+  function renderChips(){
+    chipsEl.innerHTML = "";
+    const allChip = makeChip("all", "Все", TOTAL, null);
+    chipsEl.appendChild(allChip);
+    Object.keys(CATEGORIES).forEach(key=>{
+      const cfg = CATEGORIES[key];
+      chipsEl.appendChild(makeChip(key, cfg.label, (DB[key]||[]).length, cfg.color));
+    });
+  }
+
+  function makeChip(key,label,count,color){
+    const el = document.createElement("div");
+    el.className = "chip" + (activeCategory===key ? " active":"");
+    el.setAttribute("role","button");
+    el.tabIndex = 0;
+    if(activeCategory===key){
+      el.style.background = color || "var(--amber)";
+      el.style.borderColor = "transparent";
+    }
+    el.innerHTML = (color? `<span class="swatch" style="background:${activeCategory===key?'#0a0c10':color}"></span>`:"") +
+                   `<span>${label}</span><span class="n">${count}</span>`;
+    const activate = ()=>{ activeCategory=key; visibleCount=PAGE_SIZE; renderChips(); runSearch(); };
+    el.addEventListener("click", activate);
+    el.addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); activate(); }});
+    return el;
+  }
+
+  function matches(rec, cfg, q){
+    if(!q) return true;
+    const hay = cfg.searchFields.map(f=>rec[f]).filter(Boolean).join(" ").toLowerCase();
+    return hay.includes(q);
+  }
+
+  function runSearch(){
+    const q = query.trim().toLowerCase();
+    let results = [];
+    const keys = activeCategory==="all" ? Object.keys(CATEGORIES) : [activeCategory];
+    keys.forEach(key=>{
+      const cfg = CATEGORIES[key];
+      (DB[key]||[]).forEach(rec=>{
+        if(matches(rec, cfg, q)) results.push({rec, key});
+      });
+    });
+    results.sort((a,b)=> (a.rec[CATEGORIES[a.key].titleField]||"").localeCompare(b.rec[CATEGORIES[b.key].titleField]||""));
+    renderGrid(results, q);
+  }
+
+  function shortMeta(key, rec){
+    switch(key){
+      case "people": return [["Стать", tr(rec.gender)], ["Рік народж.", tr(rec.birth_year)]];
+      case "planets": return [["Клімат", tr(rec.climate)], ["Населення", fmtNum(rec.population)]];
+      case "starships": return [["Клас", tr(rec.starship_class)], ["Виробник", tr(rec.manufacturer)]];
+      case "vehicles": return [["Клас", tr(rec.vehicle_class)], ["Виробник", tr(rec.manufacturer)]];
+      case "species": return [["Класифікація", tr(rec.classification)], ["Мова", tr(rec.language)]];
+      case "films": return [["Режисер", tr(rec.director)], ["Реліз", tr(rec.release_date)]];
+      default: return [];
+    }
+  }
+
+  function renderGrid(results, q){
+    gridEl.innerHTML = "";
+    resultCount.textContent = `${results.length} ${plural(results.length)}` + (q ? ` за запитом «${q}»` : "");
+
+    if(results.length===0){
+      gridEl.innerHTML = `<div class="empty" style="grid-column:1/-1;"><span class="big">Ø</span>Нічого не знайдено в архіві.<br>Спробуйте інший запит або категорію.</div>`;
+      loadMoreBtn.style.display = "none";
+      return;
+    }
+
+    const slice = results.slice(0, visibleCount);
+    slice.forEach(({rec,key})=>{
+      const cfg = CATEGORIES[key];
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.setProperty("--card-color", cfg.color);
+      card.tabIndex = 0;
+      card.setAttribute("role","button");
+      const meta = shortMeta(key, rec);
+      card.innerHTML = `
+        <div class="cat-tag">${cfg.singular}</div>
+        <h3>${escapeHtml(rec[cfg.titleField])}</h3>
+        <div class="meta-line">${meta.map(([k,v])=>`<span><b>${k}:</b> ${escapeHtml(String(v))}</span>`).join("")}</div>
+      `;
+      const open = ()=> openDetail(rec, key, true);
+      card.addEventListener("click", open);
+      card.addEventListener("keydown", e=>{ if(e.key==="Enter"){ open(); }});
+      gridEl.appendChild(card);
+    });
+
+    loadMoreBtn.style.display = results.length > visibleCount ? "block" : "none";
+  }
+
+  function plural(n){
+    const mod10 = n%10, mod100 = n%100;
+    if(mod10===1 && mod100!==11) return "запис";
+    if([2,3,4].includes(mod10) && ![12,13,14].includes(mod100)) return "записи";
+    return "записів";
+  }
+
+  function escapeHtml(s){
+    const d = document.createElement("div");
+    d.textContent = s==null? "": String(s);
+    return d.innerHTML;
+  }
+
+  loadMoreBtn.addEventListener("click", ()=>{ visibleCount += PAGE_SIZE; runSearch(); });
+
+  let debounceTimer;
+  searchInput.addEventListener("input", e=>{
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(()=>{
+      query = e.target.value;
+      visibleCount = PAGE_SIZE;
+      runSearch();
+    }, 120);
+  });
+
+  document.addEventListener("keydown", e=>{
+    if(e.key==="/" && document.activeElement!==searchInput && !modalOverlay.classList.contains("open")){
+      e.preventDefault(); searchInput.focus();
+    }
+    if(e.key==="Escape"){
+      if(modalOverlay.classList.contains("open")) closeModal();
+    }
+  });
+
+  /* ---------- DETAIL MODAL ---------- */
+  const modalOverlay = document.getElementById("modalOverlay");
+  const modalBody = document.getElementById("modalBody");
+  const closeBtn = document.getElementById("closeBtn");
+  const backBtn = document.getElementById("backBtn");
+  let navStack = [];
+
+  function fieldDefs(key){
+    switch(key){
+      case "people": return [
+        ["Зріст (см)", r=>fmtNum(r.height)], ["Маса (кг)", r=>fmtNum(r.mass)],
+        ["Колір волосся", r=>tr(r.hair_color)], ["Колір шкіри", r=>tr(r.skin_color)],
+        ["Колір очей", r=>tr(r.eye_color)], ["Рік народження", r=>tr(r.birth_year)],
+        ["Стать", r=>tr(r.gender)],
+      ];
+      case "planets": return [
+        ["Діаметр (км)", r=>fmtNum(r.diameter)], ["Гравітація", r=>tr(r.gravity)],
+        ["Клімат", r=>tr(r.climate)], ["Рельєф", r=>tr(r.terrain)],
+        ["Поверхн. вода (%)", r=>tr(r.surface_water)], ["Населення", r=>fmtNum(r.population)],
+        ["Період обертання (год)", r=>fmtNum(r.rotation_period)], ["Орбітальний період (дні)", r=>fmtNum(r.orbital_period)],
+      ];
+      case "starships": return [
+        ["Модель", r=>tr(r.model)], ["Клас", r=>tr(r.starship_class)],
+        ["Виробник", r=>tr(r.manufacturer)], ["Вартість (кредити)", r=>fmtNum(r.cost_in_credits)],
+        ["Довжина (м)", r=>fmtNum(r.length)], ["Екіпаж", r=>fmtNum(r.crew)],
+        ["Пасажири", r=>fmtNum(r.passengers)], ["Макс. швидкість", r=>fmtNum(r.max_atmosphering_speed)],
+        ["Рейтинг гіпердвигуна", r=>tr(r.hyperdrive_rating)], ["MGLT", r=>fmtNum(r.MGLT)],
+        ["Вантажопідйомність (кг)", r=>fmtNum(r.cargo_capacity)], ["Запаси", r=>tr(r.consumables)],
+      ];
+      case "vehicles": return [
+        ["Модель", r=>tr(r.model)], ["Клас", r=>tr(r.vehicle_class)],
+        ["Виробник", r=>tr(r.manufacturer)], ["Вартість (кредити)", r=>fmtNum(r.cost_in_credits)],
+        ["Довжина (м)", r=>fmtNum(r.length)], ["Екіпаж", r=>fmtNum(r.crew)],
+        ["Пасажири", r=>fmtNum(r.passengers)], ["Макс. швидкість", r=>fmtNum(r.max_atmosphering_speed)],
+        ["Вантажопідйомність (кг)", r=>fmtNum(r.cargo_capacity)], ["Запаси", r=>tr(r.consumables)],
+      ];
+      case "species": return [
+        ["Класифікація", r=>tr(r.classification)], ["Позначення", r=>tr(r.designation)],
+        ["Сер. зріст (см)", r=>fmtNum(r.average_height)], ["Сер. тривалість життя", r=>fmtNum(r.average_lifespan)],
+        ["Кольори шкіри", r=>tr(r.skin_colors)], ["Кольори волосся", r=>tr(r.hair_colors)],
+        ["Кольори очей", r=>tr(r.eye_colors)], ["Мова", r=>tr(r.language)],
+      ];
+      case "films": return [
+        ["Епізод", r=>tr(r.episode_id)], ["Режисер", r=>tr(r.director)],
+        ["Продюсер(и)", r=>tr(r.producer)], ["Дата релізу", r=>tr(r.release_date)],
+      ];
+      default: return [];
+    }
+  }
+
+  function relDefs(key){
+    switch(key){
+      case "people": return [["films","Фільми"],["species","Вид"],["vehicles","Транспорт"],["starships","Кораблі"]];
+      case "planets": return [["residents","Мешканці"],["films","Фільми"]];
+      case "starships": return [["pilots","Пілоти"],["films","Фільми"]];
+      case "vehicles": return [["pilots","Пілоти"],["films","Фільми"]];
+      case "species": return [["people","Представники"],["films","Фільми"]];
+      case "films": return [["characters","Персонажі"],["planets","Планети"],["starships","Кораблі"],["vehicles","Транспорт"],["species","Види"]];
+      default: return [];
+    }
+  }
+
+  // homeworld is special (single url, not array) for people & species
+  function homeworldOf(key, rec){
+    if((key==="people"||key==="species") && rec.homeworld) return rec.homeworld;
+    return null;
+  }
+
+  function openDetail(rec, key, pushHistory){
+    if(pushHistory){
+      if(navStack.length===0 || navStack[navStack.length-1].rec.url!==rec.url){
+        navStack.push({rec,key});
+      }
+    }
+    renderModal(rec, key);
+    modalOverlay.classList.add("open");
+    backBtn.disabled = navStack.length<=1;
+  }
+
+  function renderModal(rec, key){
+    const cfg = CATEGORIES[key];
+    modalBody.scrollTop = 0;
+    const modal = document.getElementById("modal");
+    modal.scrollTop = 0;
+
+    let html = "";
+    html += `<div class="cat-tag" style="color:${cfg.color};border-color:${cfg.color};">${cfg.singular}</div>`;
+    html += `<h2 id="modalTitle">${escapeHtml(rec[cfg.titleField])}</h2>`;
+    if(key==="starships"||key==="vehicles"){
+      html += `<div class="subtitle">${escapeHtml(tr(rec.model))}</div>`;
+    } else if(key==="films"){
+      html += `<div class="subtitle">Епізод ${escapeHtml(tr(rec.episode_id))}</div>`;
+    }
+
+    if(key==="films" && rec.opening_crawl){
+      html += `<div class="crawl">${escapeHtml(rec.opening_crawl)}</div>`;
+    }
+
+    // homeworld chip block
+    const hw = homeworldOf(key, rec);
+    if(hw){
+      const entry = INDEX.get(hw);
+      html += `<div class="rel-section"><div class="rel-title">Рідний світ</div><div class="rel-chips">`;
+      if(entry){
+        html += `<div class="rel-chip" data-url="${hw}" style="--rc-color:${CATEGORIES.planets.color}"><span class="sw" style="background:${CATEGORIES.planets.color}"></span>${escapeHtml(entry.record.name)}</div>`;
+      } else {
+        html += `<span class="rel-empty">невідомо</span>`;
+      }
+      html += `</div></div>`;
+    }
+
+    // field grid
+    const fields = fieldDefs(key).map(([label,fn])=>[label, fn(rec)]).filter(([,v])=>v!==undefined);
+    if(fields.length){
+      html += `<div class="field-grid">`;
+      fields.forEach(([label,val])=>{
+        html += `<div class="field"><div class="k">${label}</div><div class="v mono">${escapeHtml(String(val))}</div></div>`;
+      });
+      html += `</div>`;
+    }
+
+    // relations
+    relDefs(key).forEach(([field,label])=>{
+      const urls = rec[field] || [];
+      html += `<div class="rel-section"><div class="rel-title">${label} <span class="count">(${urls.length})</span></div>`;
+      if(urls.length===0){
+        html += `<div class="rel-empty">Немає даних</div>`;
+      } else {
+        html += `<div class="rel-chips">`;
+        urls.forEach(u=>{
+          const entry = INDEX.get(u);
+          if(!entry) return;
+          const c = CATEGORIES[entry.category];
+          const title = entry.record[c.titleField];
+          html += `<div class="rel-chip" data-url="${u}" style="--rc-color:${c.color}"><span class="sw" style="background:${c.color}"></span>${escapeHtml(title)}</div>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div>`;
+    });
+
+    modalBody.innerHTML = html;
+
+    modalBody.querySelectorAll(".rel-chip[data-url]").forEach(chip=>{
+      chip.addEventListener("click", ()=>{
+        const url = chip.getAttribute("data-url");
+        const entry = INDEX.get(url);
+        if(entry) openDetail(entry.record, entry.category, true);
+      });
+    });
+  }
+
+  function closeModal(){
+    modalOverlay.classList.remove("open");
+    navStack = [];
+  }
+
+  closeBtn.addEventListener("click", closeModal);
+  modalOverlay.addEventListener("click", e=>{ if(e.target===modalOverlay) closeModal(); });
+  backBtn.addEventListener("click", ()=>{
+    if(navStack.length>1){
+      navStack.pop();
+      const prev = navStack[navStack.length-1];
+      renderModal(prev.rec, prev.key);
+      backBtn.disabled = navStack.length<=1;
+    }
+  });
+
+  boot_sequence();
+})();
+</script>
+</body>
+</html>
