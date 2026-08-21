@@ -30,6 +30,7 @@
     --c-vehicles:#6fcf8f;
     --c-species:#ea87ab;
     --c-films:#f0c674;
+    --c-legions:#e2555f;
 
     --mono:'JetBrains Mono', ui-monospace, monospace;
     --sans:'Inter', -apple-system, sans-serif;
@@ -340,7 +341,96 @@
     vehicles:  { label:"Техніка",   singular:"Техніка",   endpoint:"vehicles", color:"var(--c-vehicles)",  titleField:"name",  searchFields:["name","model","manufacturer","vehicle_class"] },
     species:   { label:"Види",      singular:"Вид",       endpoint:"species",  color:"var(--c-species)",   titleField:"name",  searchFields:["name","classification","language"] },
     films:     { label:"Фільми",    singular:"Фільм",     endpoint:"films",    color:"var(--c-films)",     titleField:"title", searchFields:["title","director","producer","opening_crawl"] },
+    legions:   { label:"Легіони клонів", singular:"Підрозділ клонів", local:true, color:"var(--c-legions)", titleField:"name", searchFields:["name","number","jedi_generals","clone_commander","corps","armor_color"] },
   };
+
+  // ---------- Локальний набір даних: підрозділи клонів Великої армії Республіки ----------
+  // Цих даних немає в swapi.info (він охоплює лише базові дані з 6 фільмів), тож вони
+  // додані вручну на основі канону "Війн клонів" — без звернення до жодного зовнішнього API.
+  const LEGIONS_DATA = [
+    {
+      name:"501-й легіон", number:"501", corps:"Легіон",
+      jedi_generals:"Енакін Скайвокер, згодом Асока Тано (як командувачка)",
+      clone_commander:"Капітан Рекс (згодом коммандер Еппо)",
+      armor_color:"Синій", nickname:"«П'ястук Вейдера» (пізніша імперська назва)",
+      notable_battles:"Крістофсіс, Тет, Умбара, облога Мандалору",
+      notes:"Один із найелітніших підрозділів ВАР, особиста гвардія Енакіна Скайвокера. Ядром слугувала рота «Торрент».",
+    },
+    {
+      name:"212-й ударний батальйон", number:"212", corps:"Батальйон, у складі 7-го Небесного корпусу",
+      jedi_generals:"Обі-Ван Кенобі",
+      clone_commander:"Маршал-коммандер Коді",
+      armor_color:"Оранжевий", nickname:"",
+      notable_battles:"Райлот, друга битва за Джеонозис, Утапау",
+      notes:"Часто діяв разом із 501-м легіоном. Спецпідрозділ 212-го — Розвідувальний дивізіон — використовував ARF-броню для розвідки в тилу ворога.",
+    },
+    {
+      name:"91-й мобільний розвідувальний корпус", number:"91", corps:"Корпус",
+      jedi_generals:"Мейс Вінду (згодом також Аді Галлія, Стасс Аллі)",
+      clone_commander:"Коммандер Понд (рання кампанія), пізніше коммандер Нейо",
+      armor_color:"Не підтверджено з достовірних джерел",
+      nickname:"", notable_battles:"Джеонозис (полон Ват Тамбора), операція на Заллусті",
+      notes:"Спеціалізувався на розвідувальних і мобільних операціях; налічував близько 36 864 клонів у складі 16 полків.",
+    },
+    {
+      name:"104-й батальйон", number:"104", corps:"Батальйон",
+      jedi_generals:"Пло Кун",
+      clone_commander:"Коммандер Вольф",
+      armor_color:"Сірий", nickname:"«Вовча зграя» (Wolfpack)",
+      notable_battles:"Абрегадо (проти «Мстивості»), Хіссін",
+      notes:"Спеціалізувався на повітряних і швидких наземних операціях; тісно пов'язаний з ескадрильєю винищувачів «Шторм».",
+    },
+    {
+      name:"327-й зоряний корпус", number:"327", corps:"Корпус",
+      jedi_generals:"Айла Секура",
+      clone_commander:"Коммандер Блай",
+      armor_color:"Жовтий", nickname:"",
+      notable_battles:"Ескандар, Куелл, Мерідун, Фелуція",
+      notes:"Відомий методичною, вивіреною тактикою ведення вогню.",
+    },
+    {
+      name:"41-й елітний корпус", number:"41", corps:"Корпус",
+      jedi_generals:"Йода",
+      clone_commander:"Коммандер Грі",
+      armor_color:"Зелений", nickname:"«Рейнджери Йоди»",
+      notable_battles:"Кампанії на планетах-мірках у пізній фазі війни",
+      notes:"Особистий супровідний підрозділ Великого магістра Йоди.",
+    },
+    {
+      name:"21-й корпус «Нова»", number:"21", corps:"Корпус",
+      jedi_generals:"Кі-Аді-Мунді",
+      clone_commander:"Коммандер Басара",
+      armor_color:"Темно-бордовий/маруновий", nickname:"",
+      notable_battles:"Мігто-Раада, Хот (у пізніших джерелах)",
+      notes:"Один із підрозділів, що зазнав важких втрат під час виконання Наказу 66.",
+    },
+    {
+      name:"187-й легіон", number:"187", corps:"Легіон",
+      jedi_generals:"Мейс Вінду",
+      clone_commander:"—",
+      armor_color:"Фіолетовий", nickname:"",
+      notable_battles:"Кампанії під особистим командуванням Вінду",
+      notes:"Розпізнавальні знаки фіолетового кольору відповідали кольору світлового меча генерала Вінду.",
+    },
+    {
+      name:"Гвардія Корусанту", number:"—", corps:"Гарнізонний підрозділ внутрішньої безпеки",
+      jedi_generals:"Прямого джедая-генерала не мала (підпорядкована Верховному канцлеру/Сенату)",
+      clone_commander:"Коммандер Фокс",
+      armor_color:"Червоний", nickname:"«Шоктрупери»",
+      notable_battles:"Внутрішня безпека Корусанту, арешт генерала Понга Крелла",
+      notes:"Відповідала за правопорядок на Корусанті, а не за фронтові операції.",
+    },
+    {
+      name:"332-та рота", number:"332", corps:"Рота (сформована з підрозділів 501-го)",
+      jedi_generals:"Формально не мала джедая-генерала — керувалася коммандером Рексом",
+      clone_commander:"Капітан Вон",
+      armor_color:"Оранжевий (стилізований під тогруту)", nickname:"",
+      notable_battles:"Облога Мандалору",
+      notes:"Створена наприкінці війни зі складу 501-го легіону для підтримки Асоки Тано під час звільнення Мандалору.",
+    },
+  ];
+  LEGIONS_DATA.forEach((rec,i)=>{ rec.url = `local://legions/${rec.number!=="—"?rec.number:i}`; });
+  const LOCAL_DATA = { legions: LEGIONS_DATA };
 
   const UA = {
     unknown:"невідомо", "n/a":"н/д", none:"немає",
@@ -390,9 +480,14 @@
   }
 
   async function fetchCategory(key, cfg){
-    const res = await fetch(`${API_BASE}/${cfg.endpoint}`);
-    if(!res.ok) throw new Error(`${cfg.endpoint}: HTTP ${res.status}`);
-    const data = await res.json();
+    let data;
+    if(cfg.local){
+      data = LOCAL_DATA[key];
+    } else {
+      const res = await fetch(`${API_BASE}/${cfg.endpoint}`);
+      if(!res.ok) throw new Error(`${cfg.endpoint}: HTTP ${res.status}`);
+      data = await res.json();
+    }
     DB[key] = data;
     data.forEach(rec => INDEX.set(rec.url, {record:rec, category:key}));
     return data.length;
@@ -405,7 +500,7 @@
     logBoot("Ініціалізація термінала архіву...", true);
     for(const key of keys){
       const cfg = CATEGORIES[key];
-      logBoot(`Запит ресурсу: ${cfg.endpoint}...`);
+      logBoot(cfg.local ? `Індексація вбудованих даних: ${key}...` : `Запит ресурсу: ${cfg.endpoint}...`);
       try{
         const count = await fetchCategory(key, cfg);
         TOTAL += count;
@@ -420,8 +515,9 @@
       bootProgress.style.width = Math.round(((done+failed)/keys.length)*100) + "%";
     }
 
-    if(failed===keys.length){
-      // everything failed — almost certainly a CORS/file:// or offline issue
+    const networkKeys = keys.filter(k=>!CATEGORIES[k].local);
+    if(failed>0 && failed===networkKeys.length){
+      // every network-based category failed — almost certainly a CORS/file:// or offline issue
       showConnectionError();
       return;
     }
@@ -543,6 +639,7 @@
       case "vehicles": return [["Клас", tr(rec.vehicle_class)], ["Виробник", tr(rec.manufacturer)]];
       case "species": return [["Класифікація", tr(rec.classification)], ["Мова", tr(rec.language)]];
       case "films": return [["Режисер", tr(rec.director)], ["Реліз", tr(rec.release_date)]];
+      case "legions": return [["Коммандер", rec.clone_commander||"—"], ["Джедай(і)", rec.jedi_generals||"—"]];
       default: return [];
     }
   }
@@ -660,6 +757,12 @@
         ["Епізод", r=>tr(r.episode_id)], ["Режисер", r=>tr(r.director)],
         ["Продюсер(и)", r=>tr(r.producer)], ["Дата релізу", r=>tr(r.release_date)],
       ];
+      case "legions": return [
+        ["Номер", r=>r.number||"—"], ["Тип підрозділу", r=>r.corps||"невідомо"],
+        ["Джедай-генерал(и)", r=>r.jedi_generals||"невідомо"], ["Клон-командир", r=>r.clone_commander||"невідомо"],
+        ["Колір розпізн. знаків", r=>r.armor_color||"невідомо"], ["Прізвисько", r=>r.nickname||"немає"],
+        ["Відомі битви", r=>r.notable_battles||"невідомо"],
+      ];
       default: return [];
     }
   }
@@ -680,6 +783,15 @@
   function homeworldOf(key, rec){
     if((key==="people"||key==="species") && rec.homeworld) return rec.homeworld;
     return null;
+  }
+
+  function findPeopleByNamesInText(text){
+    if(!text || !DB.people) return [];
+    const found = [];
+    DB.people.forEach(p=>{
+      if(text.toLowerCase().includes(p.name.toLowerCase())) found.push(p);
+    });
+    return found;
   }
 
   function openDetail(rec, key, pushHistory){
@@ -710,6 +822,25 @@
 
     if(key==="films" && rec.opening_crawl){
       html += `<div class="crawl">${escapeHtml(rec.opening_crawl)}</div>`;
+    }
+
+    if(key==="legions" && rec.notes){
+      html += `<div class="crawl">${escapeHtml(rec.notes)}</div>`;
+    }
+
+    if(key==="legions"){
+      const matches = findPeopleByNamesInText(rec.jedi_generals);
+      html += `<div class="rel-section"><div class="rel-title">Джедай-генерал(и) у базі <span class="count">(${matches.length})</span></div>`;
+      if(matches.length===0){
+        html += `<div class="rel-empty">Збігів серед персонажів бази не знайдено</div>`;
+      } else {
+        html += `<div class="rel-chips">`;
+        matches.forEach(p=>{
+          html += `<div class="rel-chip" data-url="${p.url}" style="--rc-color:${CATEGORIES.people.color}"><span class="sw" style="background:${CATEGORIES.people.color}"></span>${escapeHtml(p.name)}</div>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div>`;
     }
 
     // homeworld chip block
